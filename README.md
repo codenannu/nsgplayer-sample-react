@@ -8,7 +8,7 @@ Paste a **public HLS `sourceUrl`**, click **Play**, tweak **runtime settings** o
 |--|--|
 | Port | **5173** |
 | Repo | [nsgplayer-sample-react](https://github.com/codenannu/nsgplayer-sample-react) |
-| SDK (pinned) | `@codenkay/video-nsgplayer-*` **^3.0.4** |
+| SDK (pinned) | `@codenkay/video-nsgplayer-*` **^5.0.0** |
 | Secrets | None |
 
 > This sample is **standalone**. It does **not** require cloning the private SDK monorepo ([`nsgplayer-video`](https://github.com/codenannu/nsgplayer-video)). It installs packages from **npm** only.
@@ -72,9 +72,9 @@ import "@codenkay/video-nsgplayer-ui/styles.css";
 
 | Package | Tested |
 |---------|--------|
-| `@codenkay/video-nsgplayer-core` | ^3.0.4 |
-| `@codenkay/video-nsgplayer-react` | ^3.0.4 |
-| `@codenkay/video-nsgplayer-ui` | ^3.0.4 |
+| `@codenkay/video-nsgplayer-core` | ^5.0.0 |
+| `@codenkay/video-nsgplayer-react` | ^5.0.0 |
+| `@codenkay/video-nsgplayer-ui` | ^5.0.0 |
 
 ## Troubleshooting
 
