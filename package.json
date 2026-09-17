@@ -3,6 +3,15 @@
   "private": true,
   "version": "1.0.0",
   "description": "NSG Player sample — React + Vite (no BFF, sourceUrl playground)",
+  "homepage": "https://github.com/codenannu/nsgplayer-sample-react#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codenannu/nsgplayer-sample-react.git"
+  },
+  "bugs": {
+    "url": "https://github.com/codenannu/nsgplayer-sample-react/issues"
+  },
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=20"

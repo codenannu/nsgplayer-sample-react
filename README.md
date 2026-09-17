@@ -1,40 +1,87 @@
 # NSG Player — React sample (no BFF)
 
-Minimal Vite + React playground for `@codenkay/video-nsgplayer-ui`.
+Public playground for the NSG HLS video player SDK. Vite + React, full control chrome, **no backend**.
 
 Paste a **public HLS `sourceUrl`**, click **Play**, tweak **runtime settings** on the right.
 
 | | |
 |--|--|
 | Port | **5173** |
-| SDK | `@codenkay/video-nsgplayer-ui` / `react` / `core` **^3.0.4** |
+| Repo | [nsgplayer-sample-react](https://github.com/codenannu/nsgplayer-sample-react) |
+| SDK (pinned) | `@codenkay/video-nsgplayer-*` **^3.0.4** |
 | Secrets | None |
+
+> This sample is **standalone**. It does **not** require cloning the private SDK monorepo ([`nsgplayer-video`](https://github.com/codenannu/nsgplayer-video)). It installs packages from **npm** only.
+
+## SDK packages
+
+| Package | Role | Used here |
+|---------|------|-----------|
+| [`@codenkay/video-nsgplayer-core`](https://www.npmjs.com/package/@codenkay/video-nsgplayer-core) | Framework-agnostic HLS engine | Yes (peer of UI) |
+| [`@codenkay/video-nsgplayer-react`](https://www.npmjs.com/package/@codenkay/video-nsgplayer-react) | React shell / headless `<VideoPlayer />` | Yes (peer of UI) |
+| [`@codenkay/video-nsgplayer-ui`](https://www.npmjs.com/package/@codenkay/video-nsgplayer-ui) | Control chrome (seek, quality, speed, live, zoom) | **Primary** |
+| [`@codenkay/video-nsgplayer-angular`](https://www.npmjs.com/package/@codenkay/video-nsgplayer-angular) | Angular headless component | No — see [Angular sample](https://github.com/codenannu/nsgplayer-sample-angular) |
+
+## Related samples
+
+| Sample | Repository | Port | Purpose |
+|--------|------------|------|---------|
+| **This repo** | [nsgplayer-sample-react](https://github.com/codenannu/nsgplayer-sample-react) | **5173** | Public `sourceUrl`, full React chrome |
+| Next.js + BFF | [nsgplayer-sample-nextjs](https://github.com/codenannu/nsgplayer-sample-nextjs) | **3001** | Auth token, signed URL, refresh, key proxy |
+| Angular | [nsgplayer-sample-angular](https://github.com/codenannu/nsgplayer-sample-angular) | **4200** | Headless Angular + host controls |
+
+Encrypted / signed NSG streams need a BFF — use the **Next.js** sample.
 
 ## Quick start
 
 ```bash
-git clone <this-repo> nsgplayer-react
-cd nsgplayer-react
+git clone https://github.com/codenannu/nsgplayer-sample-react.git
+cd nsgplayer-sample-react
 npm install
 npm run dev
 ```
 
 Open http://localhost:5173
 
-A Mux public test stream is prefilled. Encrypted NSG content needs a BFF — see **nsgplayer-nextjs** (port 3001).
+A Mux public test stream is prefilled.
+
+## Install peers (into your own app)
+
+```bash
+npm install @codenkay/video-nsgplayer-ui @codenkay/video-nsgplayer-react @codenkay/video-nsgplayer-core hls.js react react-dom
+```
+
+```tsx
+import { NsgVideoPlayerWithControls } from "@codenkay/video-nsgplayer-ui";
+import "@codenkay/video-nsgplayer-ui/styles.css";
+```
+
+**Never** put `clientSecret` in browser code.
 
 ## Lift into your app
 
 1. Copy `src/App.tsx` + settings panel patterns.
-2. Keep `import "@codenkay/video-nsgplayer-ui/styles.css"`.
-3. Install peers: `react`, `react-dom`, `hls.js`, and the three `@codenkay/video-nsgplayer-*` packages.
+2. Keep `import "@codenkay/video-nsgplayer-ui/styles.css"` (JS import — not a CSS `@import` under Tailwind PostCSS).
+3. Use published npm packages — do **not** `file:`-link a private monorepo (dual React risk).
 
 ## Shared contract
 
-`src/shared/` is vendored identically in the Next and Angular samples. Keep them in sync when editing fields.
+`src/shared/` is vendored identically in the Next and Angular samples. Keep them in sync when editing playground fields.
+
+## Version matrix
+
+| Package | Tested |
+|---------|--------|
+| `@codenkay/video-nsgplayer-core` | ^3.0.4 |
+| `@codenkay/video-nsgplayer-react` | ^3.0.4 |
+| `@codenkay/video-nsgplayer-ui` | ^3.0.4 |
 
 ## Troubleshooting
 
-- **Client Component / Next App Router** — this Vite sample is fine; in Next use the UI package (ships `"use client"`).
-- **Dual React** — do not `file:`-link the monorepo packages; use published npm.
-- **Blank player** — confirm the HLS URL is CORS-friendly and public.
+- **Blank player** — HLS URL must be CORS-friendly and public.
+- **Dual React** — resolve a single `react` / `react-dom` from the host app.
+- **Next App Router** — UI package ships a `"use client"` banner; import styles from JS/TS.
+
+## License
+
+MIT
