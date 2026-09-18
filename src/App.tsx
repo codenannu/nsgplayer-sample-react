@@ -1,7 +1,16 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import type { VideoPlayer as CorePlayer } from "@codenkay/video-nsgplayer-core";
+import type {
+  AuthConfig,
+  PlaybackCredentialConfig,
+  VideoPlayer as CorePlayer,
+} from "@codenkay/video-nsgplayer-core";
 import { NsgVideoPlayerWithControls } from "@codenkay/video-nsgplayer-ui";
 import { RuntimeSettingsPanel } from "./components/RuntimeSettingsPanel";
+import {
+  createBffAdapters,
+  DEFAULT_BFF_ORIGIN,
+  normalizeBffOrigin,
+} from "./shared/bffClient";
 import {
   DEFAULT_PLAYGROUND_CONFIG,
   toPlayerConfigPartial,
@@ -9,12 +18,18 @@ import {
 } from "./shared/playgroundConfig";
 import { SAMPLE_HLS_URL, SDK_VERSION_MATRIX } from "./shared/sampleMedia";
 
-type Session = {
-  sourceUrl: string;
-  videoId?: string;
-};
+type Mode = "sourceUrl" | "bff";
+
+type Session =
+  | { mode: "sourceUrl"; sourceUrl: string; videoId: string }
+  | { mode: "bff"; videoId: string };
+
+const BFF_ORIGIN = normalizeBffOrigin(
+  import.meta.env.VITE_BFF_ORIGIN || DEFAULT_BFF_ORIGIN,
+);
 
 export default function App() {
+  const [mode, setMode] = useState<Mode>("sourceUrl");
   const [sourceUrlDraft, setSourceUrlDraft] = useState(SAMPLE_HLS_URL);
   const [videoIdDraft, setVideoIdDraft] = useState("sample");
   const [session, setSession] = useState<Session | null>(null);
@@ -22,19 +37,47 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const playerRef = useRef<CorePlayer | null>(null);
 
-  const playerConfig = useMemo(() => toPlayerConfigPartial(config), [config]);
+  const bff = useMemo(() => createBffAdapters(BFF_ORIGIN), []);
+
+  const auth = useMemo<AuthConfig | undefined>(
+    () => (session?.mode === "bff" ? bff.auth : undefined),
+    [session, bff],
+  );
+
+  const playback = useMemo<PlaybackCredentialConfig | undefined>(
+    () => (session?.mode === "bff" ? bff.playback : undefined),
+    [session, bff],
+  );
+
+  const playerConfig = useMemo(() => {
+    const base = toPlayerConfigPartial(config);
+    if (session?.mode !== "bff") return base;
+    return { ...base, streaming: bff.streaming };
+  }, [config, session, bff]);
 
   const onPlay = () => {
-    const url = sourceUrlDraft.trim();
-    if (!url) {
-      setError("Enter a public HLS source URL.");
+    if (mode === "sourceUrl") {
+      const url = sourceUrlDraft.trim();
+      if (!url) {
+        setError("Enter a public HLS source URL.");
+        return;
+      }
+      setError(null);
+      setSession({
+        mode: "sourceUrl",
+        sourceUrl: url,
+        videoId: videoIdDraft.trim() || "sample",
+      });
+      return;
+    }
+
+    const id = videoIdDraft.trim();
+    if (!id) {
+      setError("Enter a video ID.");
       return;
     }
     setError(null);
-    setSession({
-      sourceUrl: url,
-      videoId: videoIdDraft.trim() || undefined,
-    });
+    setSession({ mode: "bff", videoId: id });
   };
 
   const onStop = () => {
@@ -44,10 +87,23 @@ export default function App() {
     setError(null);
   };
 
-  const onConfigChange = useCallback((next: PlaygroundConfig) => {
-    setConfig(next);
-    playerRef.current?.updateConfig(toPlayerConfigPartial(next));
-  }, []);
+  const onConfigChange = useCallback(
+    (next: PlaygroundConfig) => {
+      setConfig(next);
+      const base = toPlayerConfigPartial(next);
+      playerRef.current?.updateConfig(
+        session?.mode === "bff"
+          ? { ...base, streaming: bff.streaming }
+          : base,
+      );
+    },
+    [session, bff],
+  );
+
+  const onModeChange = (next: Mode) => {
+    onStop();
+    setMode(next);
+  };
 
   return (
     <div className="page">
@@ -55,34 +111,53 @@ export default function App() {
         <div>
           <h1>NSG Player — React sample</h1>
           <p className="muted">
-            No BFF · public <code>sourceUrl</code> only · SDK{" "}
-            <code>ui@{SDK_VERSION_MATRIX.ui}</code>
+            Dual mode · UI chrome · SDK <code>ui@{SDK_VERSION_MATRIX.ui}</code> ·
+            port <strong>5173</strong>
           </p>
         </div>
         <p className="banner">
-          Encrypted NSG streams need a BFF — use{" "}
-          <strong>nsgplayer-nextjs</strong> on port <strong>3001</strong>.
+          <strong>sourceUrl</strong> plays public HLS with no backend.{" "}
+          <strong>BFF</strong> mode calls{" "}
+          <code>{BFF_ORIGIN}</code> (run{" "}
+          <strong>nsgplayer-nextjs</strong> on <strong>3001</strong>) for auth,
+          signed URL, refresh, and AES key proxy — same contract as the Angular
+          sample.
         </p>
       </header>
 
       <section className="controls" aria-label="Playback source">
         <label>
-          HLS source URL
-          <input
-            value={sourceUrlDraft}
-            onChange={(e) => setSourceUrlDraft(e.target.value)}
-            placeholder={SAMPLE_HLS_URL}
-            spellCheck={false}
-          />
+          Mode
+          <select
+            value={mode}
+            onChange={(e) => onModeChange(e.target.value as Mode)}
+          >
+            <option value="sourceUrl">Direct sourceUrl (no BFF)</option>
+            <option value="bff">BFF video ID (port 3001)</option>
+          </select>
         </label>
+
+        {mode === "sourceUrl" ? (
+          <label>
+            HLS source URL
+            <input
+              value={sourceUrlDraft}
+              onChange={(e) => setSourceUrlDraft(e.target.value)}
+              placeholder={SAMPLE_HLS_URL}
+              spellCheck={false}
+            />
+          </label>
+        ) : null}
+
         <label>
-          Video ID (optional identity)
+          Video ID {mode === "sourceUrl" ? "(optional identity)" : ""}
           <input
             value={videoIdDraft}
             onChange={(e) => setVideoIdDraft(e.target.value)}
-            placeholder="sample"
+            placeholder={mode === "bff" ? "demo-video" : "sample"}
           />
         </label>
+
         <div className="actions">
           <button type="button" className="primary" onClick={onPlay}>
             Play
@@ -97,15 +172,20 @@ export default function App() {
         <main className="player-pane">
           {!session ? (
             <div className="placeholder" role="status">
-              Enter a source URL and click <strong>Play</strong>. A public Mux
-              test stream is prefilled for zero-setup.
+              Choose a mode, then click <strong>Play</strong>. Public Mux HLS is
+              prefilled for zero-setup; BFF mode needs Next on :3001.
             </div>
           ) : (
             <div className="player-shell">
               <NsgVideoPlayerWithControls
+                key={`${session.mode}-${session.videoId}-${session.mode === "sourceUrl" ? session.sourceUrl : "bff"}`}
                 ref={playerRef}
-                videoId={session.videoId || "sample"}
-                sourceUrl={session.sourceUrl}
+                videoId={session.videoId}
+                sourceUrl={
+                  session.mode === "sourceUrl" ? session.sourceUrl : undefined
+                }
+                auth={auth}
+                playback={playback}
                 config={playerConfig}
                 className="player"
                 onError={(err) => setError(err.message)}

@@ -2,7 +2,7 @@
   "name": "nsgplayer-react",
   "private": true,
   "version": "1.0.0",
-  "description": "NSG Player sample — React + Vite (no BFF, sourceUrl playground)",
+  "description": "NSG Player sample — React + Vite (sourceUrl or Next BFF client)",
   "homepage": "https://github.com/codenannu/nsgplayer-sample-react#readme",
   "repository": {
     "type": "git",
