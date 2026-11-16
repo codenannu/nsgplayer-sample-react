@@ -7,8 +7,8 @@ export const SAMPLE_HLS_URL =
 
 /** SDK version matrix — update when bumping package.json dependencies. */
 export const SDK_VERSION_MATRIX = {
-  core: "^5.0.0",
-  react: "^5.0.0",
-  ui: "^5.0.0",
-  angular: "^5.0.0",
+  core: "^5.4.0",
+  react: "^5.2.0",
+  ui: "^5.3.0",
+  angular: "^5.2.0",
 } as const;
