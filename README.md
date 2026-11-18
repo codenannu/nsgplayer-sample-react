@@ -6,17 +6,18 @@ Public playground for the NSG HLS video player SDK. Vite + React + full control 
 |--|--|
 | Port | **5173** |
 | Repo | [nsgplayer-sample-react](https://github.com/codenannu/nsgplayer-sample-react) |
-| SDK (pinned) | core **^5.4.0** · react **^5.2.0** · ui **^5.3.0** |
+| SDK (pinned) | core **^5.4.1** · react **^5.2.1** · ui **^5.3.1** |
 | Modes | Direct `sourceUrl` (default) · **BFF video ID** via Next sample **:3001** |
 
 > This sample is **standalone**. It does **not** require cloning the private SDK monorepo. It installs packages from **npm** only.
 
 ## What’s new in this release
 
-- Pins enterprise SDK line (core 5.4 / react 5.2 / ui 5.3).
+- Pins enterprise SDK line (core **5.4.1** / react **5.2.1** / ui **5.3.1**).
 - BFF mode sends **`x-device-id`** and uses **`streaming.mediaProxyUrlBuilder`** → Next `/api/media` (browser never hits the playback host).
-- UI **5.3.0**: idle toolbar (5s / leave ~1.2s) + bottom-edge progress, responsive chrome, lease error states.
-- React **5.2.0**: `useStudentLease` available for institution student flows (see core docs); this playground stays on signed-url BFF.
+- **Offline recovery**: sticky network banner clears after reconnect; HLS/token refresh resume on `online`.
+- UI chrome: idle toolbar + edge progress, responsive layout, lease error states.
+- React `useStudentLease` available for institution student flows; this playground stays on signed-url BFF.
 
 ## SDK packages
 
@@ -97,9 +98,9 @@ import "@codenkay/video-nsgplayer-ui/styles.css";
 
 | Package | Tested |
 |---------|--------|
-| `@codenkay/video-nsgplayer-core` | ^5.4.0 |
-| `@codenkay/video-nsgplayer-react` | ^5.2.0 |
-| `@codenkay/video-nsgplayer-ui` | ^5.3.0 |
+| `@codenkay/video-nsgplayer-core` | ^5.4.1 |
+| `@codenkay/video-nsgplayer-react` | ^5.2.1 |
+| `@codenkay/video-nsgplayer-ui` | ^5.3.1 |
 
 ## Troubleshooting
 
